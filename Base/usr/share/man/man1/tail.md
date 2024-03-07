@@ -15,6 +15,8 @@ $ tail [-f] [-n number] [file]
 ## Options
 
 * `-f`, `--follow`: Output data as it is written to the file
+* `-r`, `--retry`: Output data as it is written to the file
+* `-F` : Same as `--follow --retry`
 * `-n number`, `--lines number`: Print the specified number of lines
 
 ## Arguments
@@ -36,6 +38,16 @@ $ tail -n42 todo.txt
 Print the last lines as they are written to logs.log:
 ```sh
 $ tail -f logs.log
+```
+
+Retry for the file to be first accessible. It will stop once file is opened
+```sh
+$ tail -r /tmp/file
+```
+
+Follow and retry the file
+```sh
+$ tail -F /tmp/file
 ```
 
 ## See also

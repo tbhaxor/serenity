@@ -25,6 +25,7 @@
         _temporary_result.release_value();                                                           \
     })
 
+#define DEFAULT_SLEEP_TIMEOUT_MS 500 * 1000
 #define DEFAULT_LINE_COUNT 10
 
 static ErrorOr<void> tail_from_pos(Core::File& file, off_t startline)
@@ -75,6 +76,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     TRY(Core::System::pledge("stdio rpath"));
 
     bool follow = false;
+    bool retry = false;
     size_t wanted_line_count = DEFAULT_LINE_COUNT;
     bool start_from_end = true;
     StringView file;
@@ -83,9 +85,22 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     Core::ArgsParser args_parser;
     args_parser.set_general_help("Print the end ('tail') of a file.");
     args_parser.add_option(follow, "Output data as it is written to the file", "follow", 'f');
+    args_parser.add_option(retry, "Keep retrying until file is opened once", "retry", 'r');
+    args_parser.add_option(Core::ArgsParser::Option {
+        .argument_mode = Core::ArgsParser::OptionArgumentMode::None,
+        .help_string = "Same as --follow --retry",
+        .long_name = nullptr,
+        .short_name = 'F',
+        .value_name = nullptr,
+        .accept_value = [&](StringView) -> ErrorOr<bool> {
+            retry = true;
+            follow = true;
+            return true;
+        },
+    });
     args_parser.add_option(Core::ArgsParser::Option {
         .argument_mode = Core::ArgsParser::OptionArgumentMode::Required,
-        .help_string = "output the last NUM lines, instead of the last 10;"
+        .help_string = "Output the last NUM lines, instead of the last 10;"
                        " or use -n +NUM to output starting with line NUM",
         .long_name = "lines",
         .short_name = 'n',
@@ -109,10 +124,39 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     args_parser.add_positional_argument(file, "File path", "file", Core::ArgsParser::Required::No);
     args_parser.parse(arguments);
 
-    auto f = TRY(Core::File::open_file_or_standard_stream(file, Core::File::OpenMode::Read));
+    auto try_file = Core::File::open_file_or_standard_stream(file, Core::File::OpenMode::Read);
     if (!follow)
         TRY(Core::System::pledge("stdio"));
 
+    if (retry) {
+        outln("tail: warning: --retry only effective for the initial open");
+
+        u32 last_error_code = 0;
+        while (try_file.is_error()) {
+            auto const error = try_file.release_error();
+            auto const error_code = error.is_errno() ? static_cast<u32>(error.code()) : error.string_literal().hash();
+
+            if (last_error_code != error_code) {
+                last_error_code = error_code;
+
+                switch (error_code) {
+                case ENOENT:
+                    outln("tail: can not open '{}' for reading. No such file or directory", file);
+                    break;
+                case EACCES:
+                    outln("tail: can not open '{}' for reading. Permission denied", file);
+                    break;
+                default:
+                    outln("tail: can not open '{}' for reading. {}", file, error.string_literal());
+                }
+            }
+
+            try_file = Core::File::open_file_or_standard_stream(file, Core::File::OpenMode::Read);
+            usleep(DEFAULT_SLEEP_TIMEOUT_MS);
+        }
+    }
+
+    auto f = try_file.release_value();
     auto file_is_seekable = !f->seek(0, SeekMode::SetPosition).is_error();
     if (!file_is_seekable) {
         do {
@@ -127,7 +171,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
             size_t line_index = 0;
             StringBuilder line;
 
-            if (!line_count && wanted_line_count) {
+            if ((line_count == 0u) && (wanted_line_count != 0u)) {
                 out("{}", StringView { bytes });
                 continue;
             }
@@ -146,7 +190,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
                         line_index++;
                     }
                     if (line_index >= wanted_line_count)
-                        line.append(ch);
+                        line.append(static_cast<char>(ch));
                 }
                 out("{}", line.to_byte_string().substring_view(1, line.length() - 1));
                 continue;
@@ -154,7 +198,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
 
             for (size_t i = 0; i < bytes.size(); i++) {
                 auto ch = bytes.at(i);
-                line.append(ch);
+                line.append(static_cast<char>(ch));
                 if (ch == '\n' || i == bytes.size() - 1) {
                     if (wanted_line_count > line_count || line_index >= line_count - wanted_line_count)
                         out("{}", line.to_byte_string());
