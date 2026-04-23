@@ -142,7 +142,7 @@ run_nocd() {
 }
 
 run() {
-    echo "+ $@"
+    echo "+ $@" >&2
     (cd "$workdir" && "$@")
 }
 
