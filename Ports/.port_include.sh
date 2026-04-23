@@ -82,6 +82,7 @@ host_env() {
 
 installedpackagesdb="${DESTDIR}/usr/Ports/installed.db"
 
+curlopts=(--fail --silent --show-error --location)
 makeopts=("-j${MAKEJOBS}")
 installopts=()
 configscript=configure
@@ -314,7 +315,7 @@ do_download_file() {
     echo "Downloading URL: ${url}"
 
     if which curl; then
-        run_nocd curl ${curlopts:-} "$url" -L -o "$filename"
+        run_nocd curl "${curlopts[@]}" -o "$filename" "$url"  
     else
         run_nocd pro "$url" > "$filename"
     fi
