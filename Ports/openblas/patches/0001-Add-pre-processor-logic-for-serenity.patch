@@ -1,0 +1,68 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Gurkirat Singh <tbhaxor@gmail.com>
+Date: Thu, 30 Apr 2026 13:32:21 +0530
+Subject: [PATCH] Add pre-processor logic for serenity
+
+---
+ common.h                    | 6 +++---
+ driver/others/blas_server.c | 2 +-
+ driver/others/memory.c      | 2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/common.h b/common.h
+index 4746633c188f588cb874ef3d76a53bf4337f51a4..59c39a13031680066fad97f2e1190a02ee0f4229 100644
+--- a/common.h
++++ b/common.h
+@@ -91,7 +91,7 @@ extern "C" {
+ #endif
+ #include <time.h>
+ 
+-#if defined(OS_LINUX) || defined(OS_QNX)
++#if defined(OS_LINUX) || defined(OS_QNX) || !defined(__serenity__)
+ #include <malloc.h>
+ #include <sched.h>
+ #endif
+@@ -108,7 +108,7 @@ extern "C" {
+ #endif
+ #endif
+ 
+-#if defined(OS_HAIKU) || defined(OS_QNX)
++#if defined(OS_HAIKU) || defined(OS_QNX) || defined(__serenity__)
+ #define NO_SYSV_IPC
+ #endif
+ 
+@@ -565,7 +565,7 @@ static __inline void blas_lock(volatile BLASULONG *address){
+ #endif
+ #endif // !ASSEMBLER
+ 
+-#ifdef OS_LINUX
++#if defined(OS_LINUX) && !defined(__serenity__)
+ #include "common_linux.h"
+ #endif
+ 
+diff --git a/driver/others/blas_server.c b/driver/others/blas_server.c
+index ed6a850890b9315fb98736dcf397f74c0ffda675..461105915b0986cf72fbc0dbb9a1921599906bff 100644
+--- a/driver/others/blas_server.c
++++ b/driver/others/blas_server.c
+@@ -70,7 +70,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ /*********************************************************************/
+ 
+ #include "common.h"
+-#if defined(OS_LINUX) || defined(OS_NETBSD) || defined(OS_DARWIN) || defined(OS_ANDROID) || defined(OS_SUNOS) || defined(OS_FREEBSD) || defined(OS_OPENBSD) || defined(OS_DRAGONFLY) || defined(OS_HAIKU)
++#if defined(OS_LINUX) || defined(OS_NETBSD) || defined(OS_DARWIN) || defined(OS_ANDROID) || defined(OS_SUNOS) || defined(OS_FREEBSD) || defined(OS_OPENBSD) || defined(OS_DRAGONFLY) || defined(OS_HAIKU) || defined(__serenity__)
+ #include <dlfcn.h>
+ #include <errno.h>
+ #include <signal.h>
+diff --git a/driver/others/memory.c b/driver/others/memory.c
+index 17dfa60d3b3c94c75c7a4fabc9c4074a3e3434f1..2ccd35ab3cd428a06db71f7a45a47a2643d1fd50 100644
+--- a/driver/others/memory.c
++++ b/driver/others/memory.c
+@@ -140,7 +140,7 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #include <stdio.h>
+ #include <fcntl.h>
+ 
+-#if !defined(OS_WINDOWS) || defined(OS_CYGWIN_NT)
++#if !defined(OS_WINDOWS) || defined(OS_CYGWIN_NT) || defined(__serenity__)
+ #include <sys/mman.h>
+ #ifndef NO_SYSV_IPC
+ #include <sys/shm.h>

@@ -1,0 +1,13 @@
+--- a/CMake/crosscompile-arch-config.cmake
++++ b/CMake/crosscompile-arch-config.cmake
+@@ -9,8 +9,8 @@
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os -s -fdata-sections -ffunction-sections")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer -fno-unwind-tables")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-asynchronous-unwind-tables -fvisibility=hidden")
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fshort-enums -finline-small-functions")
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -findirect-inlining -fno-common")
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fshort-enums")
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-common")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmerge-all-constants -fno-ident")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-unroll-loops -fno-math-errno")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector")

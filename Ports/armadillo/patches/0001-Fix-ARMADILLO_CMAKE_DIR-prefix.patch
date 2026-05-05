@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Gurkirat Singh <tbhaxor@gmail.com>
+Date: Tue, 5 May 2026 14:04:00 +0530
+Subject: [PATCH] Fix ARMADILLO_CMAKE_DIR prefix
+
+---
+ CMakeLists.txt | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ee702f836f6b73f72d06e32dfe9061c00035ea0b..2c03f7c3feb6828e197cae14c17526fe12a1dc47 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -682,8 +682,7 @@ install(EXPORT ArmadilloLibraryDepends DESTINATION
+ # and install it
+ set(ARMADILLO_INCLUDE_DIRS "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+ set(ARMADILLO_LIB_DIR      "${CMAKE_INSTALL_FULL_LIBDIR}")
+-set(ARMADILLO_CMAKE_DIR    "${CMAKE_INSTALL_FULL_DATADIR}/Armadillo/CMake")
+-
++set(ARMADILLO_CMAKE_DIR    "${CMAKE_INSTALL_DATADIR}/Armadillo/CMake")
+ 
+ message(STATUS "Generating '${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfig.cmake'")
+ # copy/change config and configVersion file (modify only the @xyz@ variables)

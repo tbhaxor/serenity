@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Gurkirat Singh <tbhaxor@gmail.com>
+Date: Thu, 30 Apr 2026 13:47:49 +0530
+Subject: [PATCH] Prevent unintended include when `NO_SYSV_IPC` is defined
+
+---
+ driver/others/memory.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/driver/others/memory.c b/driver/others/memory.c
+index 2ccd35ab3cd428a06db71f7a45a47a2643d1fd50..a343e8db2e5ba88e0cab48ea8e289352f92707d9 100644
+--- a/driver/others/memory.c
++++ b/driver/others/memory.c
+@@ -1725,9 +1725,9 @@ inline int atoi(const char *str) { return 0; }
+ #include <sys/mman.h>
+ #ifndef NO_SYSV_IPC
+ #include <sys/shm.h>
+-#endif
+ #include <sys/ipc.h>
+ #endif
++#endif
+ 
+ #include <sys/types.h>
+ 
